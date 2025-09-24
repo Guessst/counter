@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counter App</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font import and application */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Hide the number input arrows */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 md:p-12 rounded-2xl shadow-xl max-w-sm w-full flex flex-col items-center space-y-6">
+        <h1 
+            id="app-title" 
+            class="text-4xl font-bold text-gray-800 focus:outline-none" 
+            contenteditable="true"
+        >
+            Counter App
+        </h1>
+        
+        <!-- Counter value display and edit -->
+        <input 
+            type="number" 
+            id="counter-value" 
+            class="text-6xl text-center font-extrabold text-blue-600 w-full bg-blue-50 p-4 rounded-xl border-4 border-blue-200 focus:outline-none" 
+            value="0"
+        />
+
+        <!-- Increment button -->
+        <button 
+            id="increment-btn" 
+            class="w-full bg-blue-600 text-white font-semibold py-4 rounded-xl shadow-lg hover:bg-blue-700 focus:ring-opacity-75"
+        >
+            Increment
+        </button>
+
+        <!-- Decrement button -->
+        <button 
+            id="decrement-btn" 
+            class="w-full bg-red-600 text-white font-semibold py-4 rounded-xl shadow-lg hover:bg-red-700 focus:ring-opacity-75"
+        >
+            Decrement
+        </button>
+
+        <!-- Status message area -->
+        <div id="status-message" class="text-green-600 font-medium text-sm h-6"></div>
+    </div>
+
+    <script>
+        // Get a cookie value by name
+        function getCookie(name) {
+            const cookieName = name + "=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const ca = decodedCookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(cookieName) === 0) {
+                    return c.substring(cookieName.length, c.length);
+                }
+            }
+            return "";
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get DOM elements
+            const appTitle = document.getElementById('app-title');
+            const counterInput = document.getElementById('counter-value');
+            const incrementBtn = document.getElementById('increment-btn');
+            const decrementBtn = document.getElementById('decrement-btn');
+            const statusMessage = document.getElementById('status-message');
+
+            // Set a cookie with an expiration date
+            const setCookie = (name, value, days) => {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                const expires = "expires=" + date.toUTCString();
+                document.cookie = name + "=" + value + ";" + expires + ";path=/";
+            };
+
+            // Update the counter and save to cookie
+            const updateCounterAndSave = (value) => {
+                const intValue = parseInt(value, 10);
+                if (isNaN(intValue)) return;
+
+                counterInput.value = intValue;
+                setCookie('counterValue', intValue, 30);
+            };
+
+            // Update the title and save to cookie
+            const updateTitleAndSave = (value) => {
+                setCookie('appTitle', value, 30);
+                document.title = value;
+            };
+
+            // Load the counter value from the cookie on page load
+            const loadCounter = () => {
+                const savedValue = getCookie('counterValue');
+                counterInput.value = savedValue ? savedValue : 0;
+            };
+
+            // Load the title from the cookie on page load
+            const loadTitle = () => {
+                const savedTitle = getCookie('appTitle');
+                if (savedTitle) {
+                    appTitle.textContent = savedTitle;
+                    document.title = savedTitle;
+                }
+            };
+
+            // Event listener for the increment button
+            incrementBtn.addEventListener('click', () => {
+                const currentValue = parseInt(counterInput.value, 10);
+                const newValue = currentValue + 1;
+                updateCounterAndSave(newValue);
+            });
+
+            decrementBtn.addEventListener('click', () => {
+                const currentValue = parseInt(counterInput.value, 10);
+                const newValue = currentValue - 1;
+                updateCounterAndSave(newValue);
+            });
+
+            // Event listener for manual counter input changes
+            counterInput.addEventListener('input', () => {
+                updateCounterAndSave(counterInput.value);
+            });
+
+            // Event listener for title blur (when user clicks away)
+            appTitle.addEventListener('input', () => {
+                updateTitleAndSave(appTitle.textContent);
+            });
+
+            // Initial load of the counter and title
+            loadCounter();
+            loadTitle();
+        });
+    </script>
+
+</body>
+</html>
